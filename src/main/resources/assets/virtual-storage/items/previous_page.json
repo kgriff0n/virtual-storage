@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "model",
+    "model": "virtual-storage:previous_page"
+  }
+}

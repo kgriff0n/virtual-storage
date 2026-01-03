@@ -1,0 +1,24 @@
+{
+  "providers": [
+    {
+      "type": "space",
+      "advances": {
+        "a": -8,
+        "b": -168,
+        "c": -1,
+        "d": -162,
+        "m": -60,
+        "n": -119
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "virtual-storage:gui/background.png",
+      "ascent": 13,
+      "height": 256,
+      "chars": [
+        "e"
+      ]
+    }
+  ]
+}

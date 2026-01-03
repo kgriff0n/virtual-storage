@@ -1,0 +1,28 @@
+{
+	"schemaVersion": 1,
+	"id": "virtual-storage",
+	"version": "${version}",
+	"name": "Virtual Storage",
+	"description": "A server-side mod that adds a virtual storage for each player",
+	"authors": [
+		"KGriffon"
+	],
+	"contact": {
+        "homepage": "https://modrinth.com/mod/virtual-storage",
+        "sources": "https://github.com/kgriff0n/virtual-storage"
+	},
+	"license": "MIT",
+	"icon": "assets/virtual-storage/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"kgriffon.virtualstorage.VirtualStorage"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.8",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
