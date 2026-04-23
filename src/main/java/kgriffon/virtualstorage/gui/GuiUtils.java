@@ -8,6 +8,7 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -48,7 +49,7 @@ public class GuiUtils {
     public static Text title(ServerPlayerEntity player, @Nullable Text input) {
         if (PolymerResourcePackUtils.hasMainPack(player)) {
             MutableText text = Text.empty();
-            MutableText textTexture = Text.empty().setStyle(Style.EMPTY.withFont(Identifier.of(VirtualStorage.MOD_ID, "gui")).withColor(Formatting.WHITE));
+            MutableText textTexture = Text.empty().setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of(VirtualStorage.MOD_ID, "gui"))).withColor(Formatting.WHITE));
 
             textTexture.append("a").append("e").append("b");
 

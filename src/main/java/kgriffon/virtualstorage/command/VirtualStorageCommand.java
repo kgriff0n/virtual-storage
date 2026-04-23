@@ -6,6 +6,7 @@ import kgriffon.virtualstorage.api.VirtualStorageApi;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.permission.PermissionLevel;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -17,17 +18,17 @@ public class VirtualStorageCommand {
     public static void register() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 dispatcher.register(literal("virtual-storage")
-                        .requires(Permissions.require("virtualstorage", 2))
+                        .requires(Permissions.require("virtualstorage", PermissionLevel.GAMEMASTERS))
                         .then(literal("open")
-                                .requires(Permissions.require("virtualstorage.open", 2))
+                                .requires(Permissions.require("virtualstorage.open", PermissionLevel.GAMEMASTERS))
                                 .executes(context -> open(context.getSource(), 1))
                                 .then(argument("page", IntegerArgumentType.integer(1))
-                                        .requires(Permissions.require("virtualstorage.open.page", 2))
+                                        .requires(Permissions.require("virtualstorage.open.page", PermissionLevel.GAMEMASTERS))
                                         .executes(context -> open(context.getSource(), IntegerArgumentType.getInteger(context, "page")))
                                 )
                         )
                         .then(literal("admin")
-                                .requires(Permissions.require("virtualstorage.admin", 4))
+                                .requires(Permissions.require("virtualstorage.admin", PermissionLevel.ADMINS))
                                 .then(literal("open")
                                         .then(argument("player", EntityArgumentType.player())
                                                 .executes(context -> preview(context.getSource(), EntityArgumentType.getPlayer(context, "player")))
