@@ -5,11 +5,10 @@ import dev.kgriffon.databaseutils.DatabaseLinkException;
 import dev.kgriffon.databaseutils.DatabaseQueries;
 import kgriffon.virtualstorage.LoadInventoryException;
 import kgriffon.virtualstorage.VirtualStorage;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.world.item.ItemStack;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +61,7 @@ public class VirtualStorageDb extends DatabaseQueries {
                 int slot = result.getInt("slot");
                 String item = result.getString("item");
                 try {
-                    NbtElement nbt = StringNbtReader.readCompound(item);
+                    Tag nbt = TagParser.parseCompoundFully(item);
                     ItemStack stack = ItemStack.CODEC.parse(NbtOps.INSTANCE, nbt).getOrThrow();
                     inventory.put(slot, stack);
                 } catch (CommandSyntaxException e) {

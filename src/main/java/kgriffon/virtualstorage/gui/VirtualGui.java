@@ -1,18 +1,16 @@
 package kgriffon.virtualstorage.gui;
 
 import eu.pb4.sgui.api.ClickType;
-import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import kgriffon.virtualstorage.LoadInventoryException;
 import kgriffon.virtualstorage.database.VirtualInventoryManager;
 import kgriffon.virtualstorage.inventory.VirtualInventory;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 
 public class VirtualGui extends SimpleGui {
 
@@ -37,23 +35,19 @@ public class VirtualGui extends SimpleGui {
         this(inventory, maxPage, inventory.getPlayer());
     }
 
-    public VirtualGui(VirtualInventory inventory, int maxPage, ServerPlayerEntity player) {
-        super(ScreenHandlerType.GENERIC_9X6, player, false);
+    public VirtualGui(VirtualInventory inventory, int maxPage, ServerPlayer player) {
+        super(MenuType.GENERIC_9x6, player, false);
         this.inventory = inventory;
         this.page = inventory.getPage();
         this.maxPage = maxPage;
         shouldSave = false;
 
 //        renderTitle();
-        this.setTitle(GuiUtils.title(player, Text.literal("Virtual Storage - ").append(Text.translatable("book.pageIndicator", page, maxPage))));
+        this.setTitle(GuiUtils.title(player, Component.literal("Virtual Storage - ").append(Component.translatable("book.pageIndicator", page, maxPage))));
         for (int i = 0; i < 45; i++) {
-            this.setSlotRedirect(i, new Slot(inventory, i, 0, 0));
+            this.setSlot(i, new Slot(inventory, i, 0, 0));
         }
         renderControls();
-    }
-
-    protected void renderTitle() {
-        this.setTitle(Text.literal("Virtual Storage - ").append(Text.translatable("book.pageIndicator", page, maxPage)));
     }
 
     protected void renderControls() {
@@ -67,7 +61,7 @@ public class VirtualGui extends SimpleGui {
                         try {
                             new VirtualGui(VirtualInventoryManager.getInstance().getVirtualInventory(inventory.getPlayer(), page - 1), maxPage, player).open();
                         } catch (LoadInventoryException e) {
-                            player.sendMessage(Text.translatable("mco.errorMessage.connectionFailure").formatted(Formatting.RED));
+                            player.sendSystemMessage(Component.translatable("mco.errorMessage.connectionFailure").withStyle(ChatFormatting.RED));
                             close();
                         }
                     })
@@ -80,7 +74,7 @@ public class VirtualGui extends SimpleGui {
                         try {
                             new VirtualGui(VirtualInventoryManager.getInstance().getVirtualInventory(inventory.getPlayer(), page + 1), maxPage, player).open();
                         } catch (LoadInventoryException e) {
-                            player.sendMessage(Text.translatable("mco.errorMessage.connectionFailure").formatted(Formatting.RED));
+                            player.sendSystemMessage(Component.translatable("mco.errorMessage.connectionFailure").withStyle(ChatFormatting.RED));
                             close();
                         }
                     })
@@ -89,18 +83,18 @@ public class VirtualGui extends SimpleGui {
     }
 
     @Override
-    public boolean onAnyClick(int index, ClickType type, SlotActionType action) {
-        if (0 <= index && index < 45 || action == SlotActionType.QUICK_MOVE || action == SlotActionType.PICKUP_ALL) {
+    public boolean onAnyClick(int index, ClickType type, ContainerInput action) {
+        if (0 <= index && index < 45 || action == ContainerInput.QUICK_MOVE || action == ContainerInput.PICKUP_ALL) {
             shouldSave = true;
         }
         return super.onAnyClick(index, type, action);
     }
 
     @Override
-    public void onScreenHandlerClosed() {
+    public void onRemoved() {
         if (shouldSave) {
             inventory.save();
         }
-        super.onScreenHandlerClosed();
+        super.onRemoved();
     }
 }

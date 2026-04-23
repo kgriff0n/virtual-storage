@@ -4,52 +4,50 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import kgriffon.virtualstorage.VirtualStorage;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 public class GuiUtils {
 
-    public static GuiElement empty(ServerPlayerEntity player) {
+    public static GuiElement empty(ServerPlayer player) {
         GuiElementBuilder builder = new GuiElementBuilder(Items.WHITE_STAINED_GLASS_PANE)
-                .setName(Text.empty())
+                .setName(Component.empty())
                 .hideTooltip();
         if (PolymerResourcePackUtils.hasMainPack(player)) {
-            builder.model(Identifier.of("air"));
+            builder.model(Identifier.parse("air"));
         }
         return builder.build();
     }
 
-    public static GuiElementBuilder nextPage(ServerPlayerEntity player) {
+    public static GuiElementBuilder nextPage(ServerPlayer player) {
         GuiElementBuilder builder = new GuiElementBuilder(Items.ARROW)
-                .noDefaults()
-                .setName(Text.translatable("book.page_button.next"));
+                .setName(Component.translatable("book.page_button.next"));
         if (PolymerResourcePackUtils.hasMainPack(player)) {
-            builder.model(Identifier.of(VirtualStorage.MOD_ID, "next_page"));
+            builder.model(Identifier.fromNamespaceAndPath(VirtualStorage.MOD_ID, "next_page"));
         }
         return builder;
     }
 
-    public static GuiElementBuilder previousPage(ServerPlayerEntity player) {
+    public static GuiElementBuilder previousPage(ServerPlayer player) {
         GuiElementBuilder builder = new GuiElementBuilder(Items.ARROW)
-                .noDefaults()
-                .setName(Text.translatable("book.page_button.previous"));
+                .setName(Component.translatable("book.page_button.previous"));
         if (PolymerResourcePackUtils.hasMainPack(player)) {
-            builder.model(Identifier.of(VirtualStorage.MOD_ID, "previous_page"));
+            builder.model(Identifier.fromNamespaceAndPath(VirtualStorage.MOD_ID, "previous_page"));
         }
         return builder;
     }
 
-    public static Text title(ServerPlayerEntity player, @Nullable Text input) {
+    public static Component title(ServerPlayer player, @Nullable Component input) {
         if (PolymerResourcePackUtils.hasMainPack(player)) {
-            MutableText text = Text.empty();
-            MutableText textTexture = Text.empty().setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of(VirtualStorage.MOD_ID, "gui"))).withColor(Formatting.WHITE));
+            MutableComponent text = Component.empty();
+            MutableComponent textTexture = Component.empty().setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath(VirtualStorage.MOD_ID, "gui"))).withColor(ChatFormatting.WHITE));
 
             textTexture.append("a").append("e").append("b");
 
@@ -62,7 +60,7 @@ public class GuiUtils {
             }
             return text;
         } else {
-            return input != null ? input : Text.empty();
+            return input != null ? input : Component.empty();
         }
     }
 }

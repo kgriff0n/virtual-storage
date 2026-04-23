@@ -1,26 +1,27 @@
 package kgriffon.virtualstorage.inventory;
 
 import kgriffon.virtualstorage.database.VirtualInventoryManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public class VirtualInventory implements Inventory {
+public class VirtualInventory implements Container {
 
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final int page;
     private final Map<Integer, ItemStack> content;
 
-    public VirtualInventory(ServerPlayerEntity player, int page, Map<Integer, ItemStack> content) {
+    public VirtualInventory(ServerPlayer player, int page, Map<Integer, ItemStack> content) {
         this.player = player;
         this.page = page;
         this.content = content;
     }
 
-    public ServerPlayerEntity getPlayer() {
+    public ServerPlayer getPlayer() {
         return player;
     }
 
@@ -29,16 +30,16 @@ public class VirtualInventory implements Inventory {
     }
 
     public void save() {
-        VirtualInventoryManager.getInstance().saveVirtualInventory(player.getUuid(), page, content);
+        VirtualInventoryManager.getInstance().saveVirtualInventory(player.getUUID(), page, content);
     }
 
     @Override
-    public void clear() {
+    public void clearContent() {
         content.clear();
     }
 
     @Override
-    public int size() {
+    public int getContainerSize() {
         return 45;
     }
 
@@ -48,7 +49,7 @@ public class VirtualInventory implements Inventory {
     }
 
     @Override
-    public ItemStack getStack(int slot) {
+    public @NotNull ItemStack getItem(int slot) {
         ItemStack stack = content.get(slot);
         if (stack == null) {
             return ItemStack.EMPTY;
@@ -57,7 +58,7 @@ public class VirtualInventory implements Inventory {
     }
 
     @Override
-    public ItemStack removeStack(int slot, int amount) {
+    public @NotNull ItemStack removeItem(int slot, int amount) {
         ItemStack stack = content.get(slot);
         if (stack == null) {
             return ItemStack.EMPTY;
@@ -66,7 +67,7 @@ public class VirtualInventory implements Inventory {
     }
 
     @Override
-    public ItemStack removeStack(int slot) {
+    public @NotNull ItemStack removeItemNoUpdate(int slot) {
         ItemStack stack = content.remove(slot);
         if (stack == null) {
             return ItemStack.EMPTY;
@@ -75,17 +76,17 @@ public class VirtualInventory implements Inventory {
     }
 
     @Override
-    public void setStack(int slot, ItemStack stack) {
+    public void setItem(int slot, @NotNull ItemStack stack) {
         content.put(slot, stack);
     }
 
     @Override
-    public void markDirty() {
+    public void setChanged() {
 
     }
 
     @Override
-    public boolean canPlayerUse(PlayerEntity player) {
+    public boolean stillValid(@NotNull Player player) {
         return true;
     }
 }

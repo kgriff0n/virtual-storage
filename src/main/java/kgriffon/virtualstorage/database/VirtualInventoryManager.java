@@ -2,9 +2,8 @@ package kgriffon.virtualstorage.database;
 
 import kgriffon.virtualstorage.LoadInventoryException;
 import kgriffon.virtualstorage.inventory.VirtualInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
-
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,20 +41,20 @@ public class VirtualInventoryManager {
         maxPages.remove(uuid);
     }
 
-    public int getMaxPage(ServerPlayerEntity player) {
-        UUID uuid = player.getUuid();
+    public int getMaxPage(ServerPlayer player) {
+        UUID uuid = player.getUUID();
         if (maxPages.containsKey(uuid)) {
             return maxPages.get(uuid);
         } else {
             int maxPage = db.getMaxPage(uuid);
-            maxPages.put(player.getUuid(), maxPage);
+            maxPages.put(player.getUUID(), maxPage);
             return maxPage;
         }
     }
 
-    public void setMaxPage(ServerPlayerEntity player, int value) {
-        maxPages.put(player.getUuid(), value);
-        db.setMaxPage(player.getUuid(), value);
+    public void setMaxPage(ServerPlayer player, int value) {
+        maxPages.put(player.getUUID(), value);
+        db.setMaxPage(player.getUUID(), value);
     }
 
     public List<VirtualInventory> getAll() {
@@ -66,8 +65,8 @@ public class VirtualInventoryManager {
         return list;
     }
 
-    public VirtualInventory getVirtualInventory(ServerPlayerEntity player, int page) throws LoadInventoryException {
-        UUID uuid = player.getUuid();
+    public VirtualInventory getVirtualInventory(ServerPlayer player, int page) throws LoadInventoryException {
+        UUID uuid = player.getUUID();
         List<VirtualInventory> inventories = loadedInventories.get(uuid);
         if (inventories == null) {
             inventories = new ArrayList<>();
@@ -93,8 +92,8 @@ public class VirtualInventoryManager {
         db.save(uuid, page, inventory);
     }
 
-    public void clear(ServerPlayerEntity player) {
-        unload(player.getUuid());
-        db.clear(player.getUuid());
+    public void clear(ServerPlayer player) {
+        unload(player.getUUID());
+        db.clear(player.getUUID());
     }
 }
