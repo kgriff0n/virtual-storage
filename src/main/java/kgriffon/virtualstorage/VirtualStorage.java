@@ -38,8 +38,7 @@ public class VirtualStorage implements ModInitializer {
         Type type = DatabaseUtils.getType(Config.storage);
         Database db = getDatabase(type);
 
-        VirtualStorageDb virtualStorage = new VirtualStorageDb();
-        virtualStorage.link(db);
+        VirtualStorageDb virtualStorage = new VirtualStorageDb(db);
 		VirtualInventoryManager.initialize(virtualStorage);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> SERVER = server);

@@ -3,6 +3,7 @@ package kgriffon.virtualstorage.database;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.kgriffon.databaseutils.DatabaseLinkException;
 import dev.kgriffon.databaseutils.DatabaseQueries;
+import dev.kgriffon.databaseutils.database.Database;
 import kgriffon.virtualstorage.LoadInventoryException;
 import kgriffon.virtualstorage.VirtualStorage;
 import net.minecraft.nbt.NbtOps;
@@ -18,6 +19,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public class VirtualStorageDb extends DatabaseQueries {
+
+    public VirtualStorageDb(Database db) {
+        super(db);
+    }
 
     @Override
     public void init() {
@@ -76,49 +81,57 @@ public class VirtualStorageDb extends DatabaseQueries {
     }
 
     public void save(UUID uuid, int page, Map<Integer, ItemStack> inventory) {
-        getExecutor().submit(() -> {
-            try (Connection connection = getConnection()) {
-                String sql = """
-                    DELETE FROM storage
-                    WHERE uuid = ?
-                    and page = ?
-                """;
-                PreparedStatement delete = connection.prepareStatement(sql);
-                delete.setString(1, uuid.toString());
-                delete.setInt(2, page);
-                delete.execute();
+        try {
+            getExecutor().submit(() -> {
+                try (Connection connection = getConnection()) {
+                    String sql = """
+                        DELETE FROM storage
+                        WHERE uuid = ?
+                        and page = ?
+                    """;
+                    PreparedStatement delete = connection.prepareStatement(sql);
+                    delete.setString(1, uuid.toString());
+                    delete.setInt(2, page);
+                    delete.execute();
 
-                sql = "INSERT INTO storage (uuid, page, slot, item) VALUES (?, ?, ?, ?)";
-                PreparedStatement insert = connection.prepareStatement(sql);
-                for (Map.Entry<Integer, ItemStack> item : inventory.entrySet()) {
-                    if (!item.getValue().isEmpty()) {
-                        insert.setString(1, uuid.toString());
-                        insert.setInt(2, page);
-                        insert.setInt(3, item.getKey());
-                        insert.setString(4, ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, item.getValue()).getOrThrow().toString());
-                        insert.executeUpdate();
+                    sql = "INSERT INTO storage (uuid, page, slot, item) VALUES (?, ?, ?, ?)";
+                    PreparedStatement insert = connection.prepareStatement(sql);
+                    for (Map.Entry<Integer, ItemStack> item : inventory.entrySet()) {
+                        if (!item.getValue().isEmpty()) {
+                            insert.setString(1, uuid.toString());
+                            insert.setInt(2, page);
+                            insert.setInt(3, item.getKey());
+                            insert.setString(4, ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, item.getValue()).getOrThrow().toString());
+                            insert.executeUpdate();
+                        }
                     }
+                } catch (SQLException | DatabaseLinkException e) {
+                    VirtualStorage.LOGGER.error("Unable to save page {} for {} {}", page, uuid, e.getMessage());
                 }
-            } catch (SQLException | DatabaseLinkException e) {
-                VirtualStorage.LOGGER.error("Unable to save page {} for {} {}", page, uuid, e.getMessage());
-            }
-        });
+            });
+        } catch (DatabaseLinkException e) {
+            VirtualStorage.LOGGER.error("Unable to save page {} for {} {}", page, uuid, e.getMessage());
+        }
     }
 
     public void clear(UUID uuid) {
-        getExecutor().submit(() -> {
-            try (Connection connection = getConnection()) {
-                String sql = """
-                    DELETE FROM storage
-                    WHERE uuid = ?
-                """;
-                PreparedStatement delete = connection.prepareStatement(sql);
-                delete.setString(1, uuid.toString());
-                delete.execute();
-            } catch (SQLException | DatabaseLinkException e) {
-                VirtualStorage.LOGGER.error("Unable to clear {} {}", uuid, e.getMessage());
-            }
-        });
+        try {
+            getExecutor().submit(() -> {
+                try (Connection connection = getConnection()) {
+                    String sql = """
+                        DELETE FROM storage
+                        WHERE uuid = ?
+                    """;
+                    PreparedStatement delete = connection.prepareStatement(sql);
+                    delete.setString(1, uuid.toString());
+                    delete.execute();
+                } catch (SQLException | DatabaseLinkException e) {
+                    VirtualStorage.LOGGER.error("Unable to clear {} {}", uuid, e.getMessage());
+                }
+            });
+        } catch (DatabaseLinkException e) {
+            VirtualStorage.LOGGER.error("Unable to clear {} {}", uuid, e.getMessage());
+        }
     }
 
     public int getMaxPage(UUID uuid) {
@@ -137,7 +150,7 @@ public class VirtualStorageDb extends DatabaseQueries {
         } catch (SQLException | DatabaseLinkException e) {
             VirtualStorage.LOGGER.error("Unable to read max storage for {} {}", uuid, e.getMessage());
         }
-        return 1; // default value
+        return 3; // default value
     }
 
     public void setMaxPage(UUID uuid, int value) {
